@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniBot - Intelligent Conversation Assistant</title>
+    <style>
+        :root {
+            --primary: #27AE60;
+            --primary-dark: #219653;
+            --primary-light: rgba(39, 174, 96, 0.1);
+            --background: #F5F7FA;
+            --text: #34495E;
+            --accent: #E67E22;
+            --light-gray: #f8f9fa;
+            --dark-gray: #6c757d;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+        
+        .navbar {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 15px 5%;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        
+        .logo-icon {
+            color: var(--primary);
+            margin-right: 10px;
+            font-size: 2rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .nav-link {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover:after {
+            width: 100%;
+        }
+        
+        .nav-link:hover {
+            color: var(--primary);
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .btn-outline {
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            background: transparent;
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--primary-light);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+        }
+        
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 0 5%;
+            margin-top: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-content {
+            width: 50%;
+            z-index: 2;
+        }
+        
+        .hero-image {
+            width: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            animation: fadeInUp 1s ease both;
+            animation-delay: 0.3s;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            color: var(--dark-gray);
+            line-height: 1.6;
+            animation: fadeInUp 1s ease both;
+            animation-delay: 0.5s;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            animation: fadeInUp 1s ease both;
+            animation-delay: 0.7s;
+        }
+        
+        .chat-container {
+            width: 100%;
+            max-width: 400px;
+            height: 500px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+            animation: floatIn 1s ease both;
+            animation-delay: 0.9s;
+        }
+        
+        .chat-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .bot-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 15px;
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .chat-body {
+            height: calc(100% - 130px);
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 12px 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            animation: fadeInMessage 0.5s ease both;
+        }
+        
+        .bot-message {
+            background-color: var(--light-gray);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .user-message {
+            background-color: var(--primary);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .typing-indicator {
+            display: flex;
+            padding: 12px 15px;
+            background-color: var(--light-gray);
+            border-radius: 15px;
+            border-bottom-left-radius: 5px;
+            width: fit-content;
+            margin-bottom: 15px;
+            align-self: flex-start;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--dark-gray);
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typingAnimation 1.5s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        .chat-input {
+            height: 60px;
+            border-top: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            height: 40px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 0 15px;
+            font-size: 0.95rem;
+        }
+        
+        .chat-input button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            margin-left: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-input button:hover {
+            background-color: var(--primary-dark);
+            transform: scale(1.05);
+        }
+        
+        .blob {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background-color: rgba(39, 174, 96, 0.08);
+            border-radius: 50%;
+            filter: blur(50px);
+            z-index: 1;
+        }
+        
+        .blob-1 {
+            top: -100px;
+            right: -100px;
+            animation: blobMovement 20s infinite ease-in-out alternate;
+        }
+        
+        .blob-2 {
+            bottom: -150px;
+            left: -100px;
+            width: 600px;
+            height: 600px;
+            animation: blobMovement 25s infinite ease-in-out alternate-reverse;
+        }
+        
+        .features {
+            padding: 80px 5%;
+            background-color: white;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--dark-gray);
+            max-width: 700px;
+            margin: 0 auto 50px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .feature-card {
+            background-color: var(--background);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+        
+        .feature-title {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+        }
+        
+        .feature-desc {
+            color: var(--dark-gray);
+            line-height: 1.6;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes floatIn {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        @keyframes fadeInMessage {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes typingAnimation {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        @keyframes blobMovement {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+            50% {
+                transform: translate(30px, -30px) scale(1.1);
+            }
+            100% {
+                transform: translate(-20px, 20px) scale(0.9);
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .hero {
+                flex-direction: column;
+                height: auto;
+                padding-top: 100px;
+                padding-bottom: 50px;
+                text-align: center;
+            }
+            
+            .hero-content, .hero-image {
+                width: 100%;
+            }
+            
+            .hero-content {
+                margin-bottom: 50px;
+            }
+            
+            .hero-buttons {
+                justify-content: center;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 20px;
+            }
+            
+            .logo {
+                font-size: 1.5rem;
+            }
+            
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <span class="logo-icon">●</span>
+            OmniBot
+        </div>
+        
+        <div class="nav-links">
+            <a href="#" class="nav-link">Features</a>
+            <a href="#" class="nav-link">Use Cases</a>
+            <a href="#" class="nav-link">Pricing</a>
+            <a href="#" class="nav-link">About</a>
+        </div>
+        
+        <div class="nav-buttons">
+            <a href="login.html" class="btn btn-outline">Log In</a>
+            <a href="#" class="btn btn-primary">Sign Up Free</a>
+        </div>
+    </nav>
+    
+    <section class="hero">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        
+        <div class="hero-content">
+            <h1 class="hero-title">Meet OmniBot, Your AI Assistant</h1>
+            <p class="hero-subtitle">Engage with the future of conversation. OmniBot understands context, learns from interactions, and delivers intelligent responses that feel surprisingly human.</p>
+            <div class="hero-buttons">
+                <a href="#" class="btn btn-primary">Start Chatting</a>
+                <a href="#" class="btn btn-outline">Learn More</a>
+            </div>
+        </div>
+        
+        <div class="hero-image">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="bot-avatar">O</div>
+                    <div>OmniBot</div>
+                </div>
+                
+                <div class="chat-body">
+                    <div class="message bot-message">
+                        Hi there! I'm OmniBot. How can I help you today?
+                    </div>
+                    
+                    <div class="message user-message">
+                        Can you help me schedule a meeting?
+                    </div>
+                    
+                    <div class="message bot-message">
+                        Absolutely! When would you like to schedule it, and who should be invited?
+                    </div>
+                    
+                    <div class="message user-message">
+                        Tomorrow at 2pm with the marketing team
+                    </div>
+                    
+                    <div class="typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+                
+                <div class="chat-input">
+                    <input type="text" placeholder="Type your message...">
+                    <button>→</button>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="features">
+        <h2 class="section-title">Why Choose OmniBot?</h2>
+        <p class="section-subtitle">Discover how OmniBot transforms the way you communicate with technology.</p>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🧠</div>
+                <h3 class="feature-title">Intelligent Understanding</h3>
+                <p class="feature-desc">OmniBot understands context and nuance, making conversations feel natural and productive.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3 class="feature-title">Lightning Fast</h3>
+                <p class="feature-desc">Get instant responses with no lag time, making your interactions smooth and efficient.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <h3 class="feature-title">Continuous Learning</h3>
+                <p class="feature-desc">OmniBot gets smarter with every interaction, adapting to your preferences over time.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3 class="feature-title">Secure & Private</h3>
+                <p class="feature-desc">Your conversations are encrypted and private, keeping your information safe at all times.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🌐</div>
+                <h3 class="feature-title">Multilingual Support</h3>
+                <p class="feature-desc">Communicate in over 50 languages with the same level of understanding and intelligence.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔌</div>
+                <h3 class="feature-title">Easy Integration</h3>
+                <p class="feature-desc">Connect OmniBot to your existing systems with simple API integration and customization.</p>
+            </div>
+        </div>
+    </section>
+    
+    <script>
+        // Add animation on scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            const featureCards = document.querySelectorAll('.feature-card');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0)';
+                        }, index * 100);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+            
+            featureCards.forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = 'all 0.6s ease';
+                observer.observe(card);
+            });
+            
+            // Simulate chat interaction
+            setTimeout(() => {
+                const typingIndicator = document.querySelector('.typing-indicator');
+                const chatBody = document.querySelector('.chat-body');
+                
+                typingIndicator.style.display = 'none';
+                
+                const newMessage = document.createElement('div');
+                newMessage.className = 'message bot-message';
+                newMessage.textContent = "Perfect! I've scheduled a meeting with the marketing team for tomorrow at 2:00 PM. Would you like me to send out calendar invites?";
+                chatBody.appendChild(newMessage);
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
